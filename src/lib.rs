@@ -8,19 +8,19 @@
 //!
 //! ```rust
 //! use argpars::*;
-//! 
+//!
 //! fn main() {
 //!     let mut args: ArgsObj = Argpars::new();
-//! 
+//!
 //!     // Setting basic info about the app
 //!     args.help_usage = format!("Usage: {} [OPTION]... [TEST]\n", args.arguments_passed[0]);
 //!     args.help_name = "Test App".to_string();
 //!     args.help_description = "This is a test description".to_string();
 //!     args.help_version = "v1.0".to_string();
-//! 
+//!
 //!     // Adding arguments into the app
 //!     args.add_argument("--print-stuff", "display \"stuff\"");
-//! 
+//!
 //!     // This is how you execute something when no arguments were passed
 //!     if args.no_arguments_passed() {
 //!         args.display_help_screen();
@@ -34,7 +34,7 @@
 //!             println!("stuff");
 //!         }
 //!     }
-//! 
+//!
 //!     // Executing Argpars parser and exiting from the app with a return value
 //!     std::process::exit(args.pars());
 //! }
@@ -48,14 +48,17 @@ use std::collections::HashMap;
 
 // TODO: Documentation
 
+/// Returns vector of passed arguments
 pub fn get_args() -> Vec<String> {
     std::env::args().collect::<Vec<String>>()
 }
 
-pub fn is_value_in_a_vector_str(value: &str, vector: &[String]) -> bool {
+// Returns true if a vector contains given value
+fn is_value_in_a_vector_str(value: &str, vector: &[String]) -> bool {
     return vector.iter().any(|a| a == value);
 }
 
+/// Argpars trait
 pub trait Argpars {
     fn new() -> Self;
     fn no_arguments_passed(&self) -> bool;
@@ -72,6 +75,7 @@ pub trait Argpars {
     fn lookup_update(&mut self);
 }
 
+/// ArgsObj struct
 pub struct ArgsObj {
     pub arguments_passed_args: std::env::Args,
     pub arguments_passed: Vec<String>,
@@ -90,8 +94,17 @@ pub struct ArgsObj {
     pub last_param_ok: bool,
 }
 
+/// Implementation of Argpars for the ArgsObj struct
 impl Argpars for ArgsObj {
-    // ArgsObj constructor
+    /// ArgsObj constructor
+    ///
+    /// # Examples
+    ///
+    /// ```no_run
+    /// use argpars::*;
+    ///
+    /// let mut args: ArgsObj = Argpars::new();
+    /// ```
     fn new() -> ArgsObj {
         return ArgsObj {
             arguments_passed_args: std::env::args(),
@@ -123,7 +136,7 @@ impl Argpars for ArgsObj {
         };
     }
 
-    // Function which updates lookup HashMaps such as passed_arguments_lookup or parameters_lookup
+    /// Function which updates lookup HashMaps such as passed_arguments_lookup or parameters_lookup
     fn lookup_update(&mut self) {
         for arg in &self.arguments {
             if is_value_in_a_vector_str(arg, &self.arguments_passed) {
@@ -134,7 +147,16 @@ impl Argpars for ArgsObj {
         }
     }
 
-    // Function which, when called, disables default arguments
+    /// Function which, when called, disables default arguments (--help, --version, ...)
+    ///
+    /// # Examples
+    ///
+    /// ```no_run
+    /// use argpars::*;
+    ///
+    /// let mut args: ArgsObj = Argpars::new();
+    /// args.no_default_arguments();
+    /// ```
     fn no_default_arguments(&mut self) {
         for _ in 0..2 {
             self.arguments.remove(0);
@@ -149,17 +171,48 @@ impl Argpars for ArgsObj {
         self.default_arguments = false;
     }
 
-    // Function returning if no arguments were passed
+    /// Function returning if no arguments were passed
+    ///
+    /// # Examples
+    ///
+    /// ```no_run
+    /// use argpars::*;
+    ///
+    /// let mut args: ArgsObj = Argpars::new();
+    /// if args.no_arguments_passed() {
+    ///     println!("no arguments passed");
+    /// }
+    /// ```
     fn no_arguments_passed(&self) -> bool {
         self.number_of_arguments == 1
     }
 
-    // Function which checks if an arguments was passed
+    /// Function which checks if an arguments was passed
+    ///
+    /// # Examples
+    ///
+    /// ```no_run
+    /// use argpars::*;
+    ///
+    /// let mut args: ArgsObj = Argpars::new();
+    /// if args.passed("--test") {
+    ///     println!("--test passed");
+    /// }
+    /// ```
     fn passed(&self, arg: &str) -> bool {
         is_value_in_a_vector_str(arg, &self.arguments_passed)
     }
 
-    // Function used to add an argument into the app
+    /// Function used to add an argument into the app
+    ///
+    /// # Examples
+    ///
+    /// ```no_run
+    /// use argpars::*;
+    ///
+    /// let mut args: ArgsObj = Argpars::new();
+    /// args.add_argument("--test", "test argument");
+    /// ```
     fn add_argument(&mut self, argument: &str, description: &str) {
         self.arguments.push(argument.to_string());
         self.arg_desc_vec.push(argument.to_string());
@@ -171,12 +224,34 @@ impl Argpars for ArgsObj {
         self.lookup_update();
     }
 
-    // Function returning if default arguments were passed
+    /// Function returning if default arguments were passed
+    ///
+    /// # Examples
+    ///
+    /// ```no_run
+    /// use argpars::*;
+    ///
+    /// let mut args: ArgsObj = Argpars::new();
+    /// if args.default_arguments_passed() {
+    ///     println!("default arguments passed")
+    /// }
+    /// ```
     fn default_arguments_passed(&self) -> bool {
         self.passed("--help") || self.passed("--version")
     }
 
-    // Function returning if wrong (non existent) arguments / parameters were passed
+    /// Function returning if wrong (non existent) arguments / parameters were passed
+    ///
+    /// # Examples
+    ///
+    /// ```no_run
+    /// use argpars::*;
+    ///
+    /// let mut args: ArgsObj = Argpars::new();
+    /// if args.wrong_arguments_passed() {
+    ///     println!("wrong arguments passed")
+    /// }
+    /// ```
     fn wrong_arguments_passed(&self) -> bool {
         let mut loop_end: usize = self.number_of_arguments as usize;
         if self.last_param_ok {
@@ -197,7 +272,16 @@ impl Argpars for ArgsObj {
         false
     }
 
-    // Function used to retrive passed parameter to an argument
+    /// Function used to retrive passed parameter to an argument
+    ///
+    /// # Examples
+    ///
+    /// ```no_run
+    /// use argpars::*;
+    ///
+    /// let mut args: ArgsObj = Argpars::new();
+    /// println!("parameter for --help: {}", args.get_parameter_for("--help"));
+    /// ```
     fn get_parameter_for(&self, arg: &str) -> &str {
         let index_of_argument: usize = self.arguments_passed.iter().position(|r| r == arg).unwrap();
         let index_of_parameter: usize = index_of_argument + 1;
@@ -213,7 +297,16 @@ impl Argpars for ArgsObj {
         ""
     }
 
-    // Function used to display error messages
+    /// Function used to display error messages
+    ///
+    /// # Examples
+    ///
+    /// ```no_run
+    /// use argpars::*;
+    ///
+    /// let mut args: ArgsObj = Argpars::new();
+    /// args.display_error_message("no_such_option", "additional");
+    /// ```
     fn display_error_message(&self, err_type: &str, additional: &str) {
         if err_type == "no_such_option" {
             eprintln!("ERROR: No such option: \'{}\'", additional);
@@ -224,7 +317,16 @@ impl Argpars for ArgsObj {
         }
     }
 
-    // Function used to display the help screen
+    /// Function used to display the help screen
+    ///
+    /// # Examples
+    ///
+    /// ```no_run
+    /// use argpars::*;
+    ///
+    /// let mut args: ArgsObj = Argpars::new();
+    /// args.display_help_screen();
+    /// ```
     fn display_help_screen(&self) {
         println!("{}", self.help_usage);
         println!("Name: {}", self.help_name);
@@ -257,14 +359,33 @@ impl Argpars for ArgsObj {
         }
     }
 
-    // Function used to add a section into the help screen
+    /// Function used to add a section into the help screen
+    ///
+    /// # Examples
+    ///
+    /// ```no_run
+    /// use argpars::*;
+    ///
+    /// let mut args: ArgsObj = Argpars::new();
+    /// args.add_help_section("TEST SECTION:", "\tthis is a test section!\n");
+    /// ```
     fn add_help_section(&mut self, section: &str, content: &str) {
         self.help_sections.push(section.to_string());
         self.help_sections_content.push(section.to_string());
         self.help_sections_content.push(content.to_string());
     }
 
-    // Main Argpars parser
+    /// Main Argpars parser
+    ///
+    /// # Examples
+    ///
+    /// ```no_run
+    /// use argpars::*;
+    ///
+    /// let mut args: ArgsObj = Argpars::new();
+    /// // Executing Argpars parser and exiting from the app with a return value
+    /// std::process::exit(args.pars());
+    /// ```
     fn pars(&self) -> i32 {
         if self.no_arguments_passed() {
             // // Displaying help screen if no arguments were passed (disabled by default):
