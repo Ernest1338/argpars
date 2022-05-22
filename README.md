@@ -2,6 +2,10 @@
 
 Dependency-less, simple yet functional Command Line Argument Parser
 
+# Features
+
+TODO
+
 # Usage
 
 Basic usage (checkout the examples/usage.rs file for more information)
