@@ -47,7 +47,7 @@
 use std::collections::HashMap;
 
 /// Returns vector of passed arguments
-pub fn get_args() -> Vec<String> {
+fn get_args() -> Vec<String> {
     std::env::args().collect::<Vec<String>>()
 }
 
