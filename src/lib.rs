@@ -137,7 +137,7 @@ impl Argpars for ArgsObj {
     /// Function which updates lookup HashMaps such as passed_arguments_lookup or parameters_lookup
     fn lookup_update(&mut self) {
         for arg in &self.arguments {
-            if is_value_in_a_vector_str(arg, &self.arguments_passed) {
+            if self.arguments_passed.contains(arg) {
                 *self.passed_arguments_lookup.get_mut(&*arg).unwrap() = true;
                 *self.parameters_lookup.get_mut(&*arg).unwrap() =
                     self.get_parameter_for(arg).to_string();
@@ -257,13 +257,13 @@ impl Argpars for ArgsObj {
         }
         for i in 1..loop_end {
             if self.arguments_passed[i as usize].starts_with('-') {
-                if !is_value_in_a_vector_str(&self.arguments_passed[i as usize], &self.arguments) {
+                if !self.arguments.contains(&self.arguments_passed[i as usize]) {
                     return true;
                 }
-            } else if !is_value_in_a_vector_str(
-                &self.arguments_passed[(i - 1) as usize],
-                &self.arguments,
-            ) {
+            } else if !self
+                .arguments
+                .contains(&self.arguments_passed[(i - 1) as usize])
+            {
                 return true;
             }
         }
@@ -284,10 +284,9 @@ impl Argpars for ArgsObj {
         let index_of_argument: usize = self.arguments_passed.iter().position(|r| r == arg).unwrap();
         let index_of_parameter: usize = index_of_argument + 1;
         if index_of_parameter < self.arguments_passed.len()
-            && !is_value_in_a_vector_str(
-                &self.arguments_passed[index_of_parameter],
-                &self.arguments,
-            )
+            && !self
+                .arguments
+                .contains(&self.arguments_passed[index_of_parameter])
         {
             return &self.arguments_passed[index_of_parameter];
         }
@@ -332,7 +331,7 @@ impl Argpars for ArgsObj {
         println!("Version: {}\n", self.help_version);
         println!("Possible options:");
         for arg in &self.arguments {
-            if is_value_in_a_vector_str(arg, &self.arg_desc_vec) {
+            if self.arg_desc_vec.contains(arg) {
                 let desc_index: usize =
                     self.arg_desc_vec.iter().position(|a| a == arg).unwrap() + 1;
                 println!("\t{}\t{}", arg, self.arg_desc_vec[desc_index]);
@@ -344,7 +343,7 @@ impl Argpars for ArgsObj {
             println!();
             for section in &self.help_sections {
                 println!("{}", section);
-                if is_value_in_a_vector_str(section, &self.help_sections_content) {
+                if self.help_sections_content.contains(section) {
                     let content_index: usize = self
                         .help_sections_content
                         .iter()
@@ -396,10 +395,7 @@ impl Argpars for ArgsObj {
             for i in 1..loop_end {
                 // If there is a '-' character at the beginning and it is not an known argument, throw an error
                 if self.arguments_passed[i as usize].starts_with('-') {
-                    if !is_value_in_a_vector_str(
-                        &self.arguments_passed[i as usize],
-                        &self.arguments,
-                    ) {
+                    if !self.arguments.contains(&self.arguments_passed[i as usize]) {
                         self.display_error_message(
                             "no_such_option",
                             &self.arguments_passed[i as usize],
