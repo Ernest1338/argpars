@@ -100,7 +100,7 @@ impl Argpars for ArgsObj {
     /// let mut args: ArgsObj = Argpars::new();
     /// ```
     fn new() -> ArgsObj {
-        return ArgsObj {
+        ArgsObj {
             arguments_passed_args: std::env::args(),
             arguments_passed: get_args(),
             number_of_arguments: std::env::args().len() as u32,
@@ -127,15 +127,15 @@ impl Argpars for ArgsObj {
                 ("--version".to_string(), "".to_string()),
             ]),
             last_param_ok: false,
-        };
+        }
     }
 
     /// Function which updates lookup HashMaps such as passed_arguments_lookup or parameters_lookup
     fn lookup_update(&mut self) {
         for arg in &self.arguments {
             if self.arguments_passed.contains(arg) {
-                *self.passed_arguments_lookup.get_mut(&*arg).unwrap() = true;
-                *self.parameters_lookup.get_mut(&*arg).unwrap() =
+                *self.passed_arguments_lookup.get_mut(arg).unwrap() = true;
+                *self.parameters_lookup.get_mut(arg).unwrap() =
                     self.get_parameter_for(arg).to_string();
             }
         }
